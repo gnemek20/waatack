@@ -72,4 +72,13 @@ router.post('/login', async (req, res) => {
   }
 })
 
+router.post('/workspaces', async (req, res) => {
+  const { workbench } = req.body;
+  const { data } = await drive.files.list({
+    q: `mimeType = "application/vnd.google-apps.folder" and "${workbench}" in parents`
+  });
+
+  res.status(200).send(data.files);
+})
+
 module.exports = router;
