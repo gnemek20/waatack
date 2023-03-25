@@ -95,4 +95,13 @@ router.post('/addWorkspace', async (req, res) => {
   res.status(200).send(data.id);
 })
 
+router.post('/images', async (req, res) => {
+  const { workspace } = req.body;
+  const { data } = await drive.files.list({
+    q: `"${workspace}" in parents`
+  });
+
+  res.status(200).send(data.files);
+})
+
 module.exports = router;
