@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
         mimeType: 'application/vnd.google-apps.folder',
         parents: ['1RxlfwyPfBh_0CATGpr8IjXcH5tucjHEt']
       },
-      fields: 'name,id'
+      fields: 'id,name'
     });
 
     console.log(`created folder id: ${folder.data.id}`);
@@ -75,7 +75,8 @@ router.post('/login', async (req, res) => {
 router.post('/workspaces', async (req, res) => {
   const { workbench } = req.body;
   const { data } = await drive.files.list({
-    q: `mimeType = "application/vnd.google-apps.folder" and "${workbench}" in parents`
+    q: `mimeType = "application/vnd.google-apps.folder" and "${workbench}" in parents`,
+    orderBy: 'createdTime'
   });
 
   res.status(200).send(data.files);
@@ -89,7 +90,7 @@ router.post('/addWorkspace', async (req, res) => {
       mimeType: 'application/vnd.google-apps.folder',
       parents: [`${workbench}`]
     },
-    fields: 'name,id'
+    fields: 'id,name'
   });
 
   res.status(200).send(data.id);
@@ -98,10 +99,41 @@ router.post('/addWorkspace', async (req, res) => {
 router.post('/images', async (req, res) => {
   const { workspace } = req.body;
   const { data } = await drive.files.list({
-    q: `"${workspace}" in parents`
+    q: `"${workspace}" in parents`,
+    orderBy: 'createdTime'
   });
 
   res.status(200).send(data.files);
+})
+
+router.post('/upload', upload.any(), async (req, res) => {
+  const { files } = req;
+  const { workspace } = req.body;
+  const uploadedFiles = [];
+
+  for (let file of files) {
+    const bufferStream = new stream.PassThrough();
+    bufferStream.end(file.buffer);
+  
+    const { data } = await drive.files.create({
+      media: {
+        mimeType: file.mimeType,
+        body: bufferStream
+      },
+      requestBody: {
+        name: file.originalname,
+        parents: [`${workspace}`]
+      },
+      fields: 'id,name'
+    });
+  
+    uploadedFiles.push({
+      id: data.id,
+      name: data.name
+    });
+  }
+
+  res.status(200).send(uploadedFiles);
 })
 
 module.exports = router;
