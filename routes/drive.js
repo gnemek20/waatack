@@ -81,4 +81,18 @@ router.post('/workspaces', async (req, res) => {
   res.status(200).send(data.files);
 })
 
+router.post('/addWorkspace', async (req, res) => {
+  const { workbench, name } = req.body;
+  const { data } = await drive.files.create({
+    requestBody: {
+      name: `${name}`,
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [`${workbench}`]
+    },
+    fields: 'name,id'
+  });
+
+  res.status(200).send(data.id);
+})
+
 module.exports = router;
