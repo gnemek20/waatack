@@ -62,12 +62,10 @@ router.post('/login', async (req, res) => {
       fields: 'id,name'
     });
 
-    console.log(`created folder id: ${folder.data.id}`);
     res.status(200).send(folder.data.id);
   }
   else if (data.files.length !== 0) {
     // 아이디가 존재할 경우
-    console.log(`already exist id: ${data.files[0].id}`);
     res.status(200).send(data.files[0].id);
   }
 })
