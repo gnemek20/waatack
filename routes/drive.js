@@ -104,7 +104,7 @@ router.post('/images', async (req, res) => {
   res.status(200).send(data.files);
 })
 
-router.post('/upload', upload.any(), async (req, res) => {
+router.post('/uploadImage', upload.any(), async (req, res) => {
   const { files } = req;
   const { workspace } = req.body;
   const uploadedFiles = [];
