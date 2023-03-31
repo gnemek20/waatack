@@ -90,6 +90,28 @@ router.post('/addWorkspace', async (req, res) => {
     },
     fields: 'id,name'
   });
+  const coco = await drive.files.create({
+    media: {
+      mimeType: 'application/json',
+      body: ''
+    },
+    requestBody: {
+      name: 'coco.json',
+      parents: [`${data.id}`]
+    },
+    fields: 'id,name'
+  })
+  const save = await drive.files.create({
+    media: {
+      mimeType: 'text/plain',
+      body: ''
+    },
+    requestBody: {
+      name: 'save.txt',
+      parents: [`${data.id}`]
+    },
+    fields: 'id,name'
+  })
 
   res.status(200).send(data.id);
 })
@@ -97,7 +119,7 @@ router.post('/addWorkspace', async (req, res) => {
 router.post('/images', async (req, res) => {
   const { workspace } = req.body;
   const { data } = await drive.files.list({
-    q: `"${workspace}" in parents and not mimeType="application/json"`,
+    q: `"${workspace}" in parents and not mimeType="application/json" and not mimeType="text/plain"`,
     orderBy: 'createdTime'
   });
 
@@ -134,7 +156,7 @@ router.post('/uploadImage', upload.any(), async (req, res) => {
   res.status(200).send(uploadedFiles);
 })
 
-router.post('/uploadCoco', async (req, res) => {
+router.post('/updateCoco', async (req, res) => {
   const { workspace, images, categories, annotations } = req.body;
 
   let imageNameArray = [];
@@ -187,20 +209,78 @@ router.post('/uploadCoco', async (req, res) => {
   }
   annotationsString = [annotationsString, '\n  ]'].join('');
 
+  const list = await drive.files.list({
+    q: `"${workspace}" in parents and mimeType="application/json"`
+  });
+
   const coco = ['{\n', imagesString, categoriesString, annotationsString, '\n}'].join('');
-  const { data } = await drive.files.create({
+  const { id } = list.data.files[0];
+  const { data } = await drive.files.update({
+    fileId: `${id}`,
     media: {
       mimeType: 'application/json',
       body: coco
-    },
-    requestBody: {
-      name: 'coco.json',
-      parents: [`${workspace}`]
     },
     fields: 'id,name'
   });
 
   res.status(200).send(data.id);
+})
+
+router.post('/getCoco', async (req, res) => {
+  const { workspace } = req.body;
+  const list = await drive.files.list({
+    q: `"${workspace}" in parents and mimeType="application/json"`
+  });
+
+  const { id } = list.data.files[0];
+  res.status(200).send(id);
+})
+
+router.post('/updateSave', async (req, res) => {
+  const { workspace, categories, annotations } = req.body;
+
+  let categoriesString = 'categories';
+  categories.forEach((category) => {
+    categoriesString = [categoriesString, category.name].join('|');
+  });
+
+  let annotationsString = 'annotations';
+  annotations.forEach((annotation) => {
+    annotationsString = [annotationsString, `${annotation.image}@${annotation.canvasIndex}@${annotation.name}@${annotation.x}@${annotation.y}@${annotation.dx}@${annotation.dy}`].join('|');
+  })
+
+  const list = await drive.files.list({
+    q: `"${workspace}" in parents and mimeType="text/plain"`
+  });
+
+  const save = [categoriesString, annotationsString].join('\n');
+  const { id } = list.data.files[0];
+  const { data } = await drive.files.update({
+    fileId: `${id}`,
+    media: {
+      mimeType: 'text/plain',
+      body: save
+    },
+    fields: 'id,name'
+  });
+
+  res.status(200).send(data.id);
+})
+
+router.post('/getSave', async (req, res) => {
+  const { workspace } = req.body;
+  const list = await drive.files.list({
+    q: `"${workspace}" in parents and mimeType="text/plain"`
+  });
+
+  const { id } = list.data.files[0];
+  const file = await drive.files.get({
+    fileId: id,
+    alt: 'media'
+  });
+  
+  res.status(200).send(file.data);
 })
 
 module.exports = router;
