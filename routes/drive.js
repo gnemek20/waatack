@@ -97,7 +97,7 @@ router.post('/addWorkspace', async (req, res) => {
 router.post('/images', async (req, res) => {
   const { workspace } = req.body;
   const { data } = await drive.files.list({
-    q: `"${workspace}" in parents`,
+    q: `"${workspace}" in parents and not mimeType="application/json"`,
     orderBy: 'createdTime'
   });
 
@@ -132,6 +132,75 @@ router.post('/uploadImage', upload.any(), async (req, res) => {
   }
 
   res.status(200).send(uploadedFiles);
+})
+
+router.post('/uploadCoco', async (req, res) => {
+  const { workspace, images, categories, annotations } = req.body;
+
+  let imageNameArray = [];
+  let imagesString = '  "images": [';
+  for (let i = 0; i < images?.length; i++) {
+    imageNameArray.push(images[i].name);
+    imagesString = [imagesString, `
+    {
+      "file_name": ${images[i].name},
+      "height": ${images[i].height},
+      "width": ${images[i].width},
+      "id": ${i}
+    },`].join('');
+  }
+  imagesString = [imagesString, '\n  ],\n'].join('');
+
+  let categoryNameArray = [];
+  let categoriesString = '  "categories": [';
+  for (let i = 0; i < categories?.length; i++) {
+    categoryNameArray.push(categories[i].name);
+    categoriesString = [categoriesString, `
+    {
+      "supercategory": "Defect",
+      "id": ${i},
+      "name": ${categories[i].name}
+    },`].join('');
+  }
+  categoriesString = [categoriesString, '\n  ],\n'].join('');
+
+  let annotationsString = '  "annotations": [';
+  for (let i = 0; i < annotations?.length; i++) {
+    const image_id = imageNameArray.indexOf(annotations[i].image);
+    const category_id = categoryNameArray.indexOf(annotations[i].name);
+
+    annotationsString = [annotationsString, `
+    {
+      "id": ${i},
+      "image_id": ${image_id},
+      "bbox": [
+        ${annotations[i].x},
+        ${annotations[i].y},
+        ${annotations[i].dx - annotations[i].x},
+        ${annotations[i].dy - annotations[i].y}
+      ],
+      "area": ${(annotations[i].dx - annotations[i].x) * (annotations[i].dy - annotations[i].y)},
+      "iscrowd": 0,
+      "category_id": ${category_id},
+      "segmentation": []
+    },`].join('');
+  }
+  annotationsString = [annotationsString, '\n  ]'].join('');
+
+  const coco = ['{\n', imagesString, categoriesString, annotationsString, '\n}'].join('');
+  const { data } = await drive.files.create({
+    media: {
+      mimeType: 'application/json',
+      body: coco
+    },
+    requestBody: {
+      name: 'coco.json',
+      parents: [`${workspace}`]
+    },
+    fields: 'id,name'
+  });
+
+  res.status(200).send(data.id);
 })
 
 module.exports = router;
