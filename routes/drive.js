@@ -165,7 +165,7 @@ router.post('/updateCoco', async (req, res) => {
     imageNameArray.push(images[i].name);
     imagesString = [imagesString, `
     {
-      "file_name": ${images[i].name},
+      "file_name": "${images[i].name}",
       "height": ${images[i].height},
       "width": ${images[i].width},
       "id": ${i}
@@ -181,7 +181,7 @@ router.post('/updateCoco', async (req, res) => {
     {
       "supercategory": "Defect",
       "id": ${i},
-      "name": ${categories[i].name}
+      "name": "${categories[i].name}"
     },`].join('');
   }
   categoriesString = [categoriesString, '\n  ],\n'].join('');
