@@ -241,12 +241,12 @@ router.post('/updateSave', async (req, res) => {
   const { workspace, categories, annotations } = req.body;
 
   let categoriesString = 'categories';
-  categories.forEach((category) => {
+  categories?.forEach((category) => {
     categoriesString = [categoriesString, category.name].join('|');
   });
 
   let annotationsString = 'annotations';
-  annotations.forEach((annotation) => {
+  annotations?.forEach((annotation) => {
     annotationsString = [annotationsString, `${annotation.image}@${annotation.canvasIndex}@${annotation.name}@${annotation.x}@${annotation.y}@${annotation.dx}@${annotation.dy}`].join('|');
   })
 
