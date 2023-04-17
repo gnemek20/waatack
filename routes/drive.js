@@ -161,83 +161,89 @@ router.post('/updateCoco', async (req, res) => {
 
   let imageNameArray = [];
   let imagesString = '  "images": [';
-  imagesString = [imagesString, `
-    {
-      "file_name": "${images[0].name}",
-      "height": ${images[0].height},
-      "width": ${images[0].width},
-      "id": ${0}
-    }`].join('');
-  for (let i = 0; i < images?.length; i++) {
-    imageNameArray.push(images[i].name);
-    if (i !== 0) {
-      imagesString = [imagesString, `
-    {
-      "file_name": "${images[i].name}",
-      "height": ${images[i].height},
-      "width": ${images[i].width},
-      "id": ${i}
-    }`].join(',');
+  if (images?.length > 0) {
+    imagesString = [imagesString, `
+      {
+        "file_name": "${images[0].name}",
+        "height": ${images[0].height},
+        "width": ${images[0].width},
+        "id": ${0}
+      }`].join('');
+    for (let i = 0; i < images?.length; i++) {
+      imageNameArray.push(images[i].name);
+      if (i !== 0) {
+        imagesString = [imagesString, `
+      {
+        "file_name": "${images[i].name}",
+        "height": ${images[i].height},
+        "width": ${images[i].width},
+        "id": ${i}
+      }`].join(',');
+      }
     }
   }
   imagesString = [imagesString, '\n  ],\n'].join('');
 
   let categoryNameArray = [];
   let categoriesString = '  "categories": [';
-  categoriesString = [categoriesString, `
-    {
-      "supercategory": "Defect",
-      "id": ${0},
-      "name": "${categories[0].name}"
-    }`].join('');
-  for (let i = 0; i < categories?.length; i++) {
-    categoryNameArray.push(categories[i].name);
-    if (i !== 0) {
-      categoriesString = [categoriesString, `
-    {
-      "supercategory": "Defect",
-      "id": ${i},
-      "name": "${categories[i].name}"
-    }`].join(',');
+  if (categories?.length > 0) {
+    categoriesString = [categoriesString, `
+      {
+        "supercategory": "Defect",
+        "id": ${0},
+        "name": "${categories[0].name}"
+      }`].join('');
+    for (let i = 0; i < categories?.length; i++) {
+      categoryNameArray.push(categories[i].name);
+      if (i !== 0) {
+        categoriesString = [categoriesString, `
+      {
+        "supercategory": "Defect",
+        "id": ${i},
+        "name": "${categories[i].name}"
+      }`].join(',');
+      }
     }
   }
   categoriesString = [categoriesString, '\n  ],\n'].join('');
 
   let annotationsString = '  "annotations": [';
-  annotationsString = [annotationsString, `
-    {
-      "id": ${0},
-      "image_id": ${imageNameArray.indexOf(annotations[0].image)},
-      "bbox": [
-        ${annotations[0].x},
-        ${annotations[0].y},
-        ${annotations[0].dx - annotations[0].x},
-        ${annotations[0].dy - annotations[0].y}
-      ],
-      "area": ${(annotations[0].dx - annotations[0].x) * (annotations[0].dy - annotations[0].y)},
-      "iscrowd": 0,
-      "category_id": ${categoryNameArray.indexOf(annotations[0].name)},
-      "segmentation": []
-    }`].join('');
-  for (let i = 1; i < annotations?.length; i++) {
-    const image_id = imageNameArray.indexOf(annotations[i].image);
-    const category_id = categoryNameArray.indexOf(annotations[i].name);
-
+  if (annotations?.length > 0) {
     annotationsString = [annotationsString, `
-    {
-      "id": ${i},
-      "image_id": ${image_id},
-      "bbox": [
-        ${annotations[i].x},
-        ${annotations[i].y},
-        ${annotations[i].dx - annotations[i].x},
-        ${annotations[i].dy - annotations[i].y}
-      ],
-      "area": ${(annotations[i].dx - annotations[i].x) * (annotations[i].dy - annotations[i].y)},
-      "iscrowd": 0,
-      "category_id": ${category_id},
-      "segmentation": []
-    }`].join(',');
+      {
+        "id": ${0},
+        "image_id": ${imageNameArray.indexOf(annotations[0].image)},
+        "bbox": [
+          ${parseInt(annotations[0].x)},
+          ${parseInt(annotations[0].y)},
+          ${parseInt(annotations[0].dx) - parseInt(annotations[0].x)},
+          ${parseInt(annotations[0].dy) - parseInt(annotations[0].y)}
+        ],
+        "area": ${(parseInt(annotations[0].dx) - parseInt(annotations[0].x)) * (parseInt(annotations[0].dy) - parseInt(annotations[0].y))},
+        "iscrowd": 0,
+        "category_id": ${categoryNameArray.indexOf(annotations[0].name)},
+        "segmentation": []
+      }`].join('');
+    for (let i = 1; i < annotations?.length; i++) {
+      const image_id = imageNameArray.indexOf(annotations[i].image);
+      const category_id = categoryNameArray.indexOf(annotations[i].name);
+  
+      annotationsString = [annotationsString, `
+      {
+        "id": ${i},
+        "image_id": ${image_id},
+        "bbox": [
+          ${annotations[i].x},
+          ${annotations[i].y},
+          ${annotations[i].dx - annotations[i].x},
+          ${annotations[i].dy - annotations[i].y}
+        ],
+        "area": ${(annotations[i].dx - annotations[i].x) * (annotations[i].dy - annotations[i].y)},
+        "iscrowd": 0,
+        "category_id": ${category_id},
+        "segmentation": []
+      }`].join(',');
+    }
   }
   annotationsString = [annotationsString, '\n  ]'].join('');
 
