@@ -6,7 +6,7 @@ const upload = multer();
 
 const fs = require('fs');
 
-// const { spawn } = require('child_process');
+const { spawn } = require('child_process');
 const { PythonShell } = require('python-shell');
 
 /* GET drive listing. */
@@ -165,32 +165,32 @@ router.post('/inference', async (req, res) => {
   const { id, pretrainedModel } = req.body;
   const xmlDir = `${process.cwd()}/public/xmls`;
 
-  // const inference = () => {
-  //   // const result = spawn('python', ['${process.cwd()}/public/pythons/inferenceWeb.py', '${process.cwd()}/public/images/', '', xmlDir, pretrainedModel, id]);
-  //   const result = spawn('python', [`${process.cwd()}/public/pythons/singleInferenceWeb.py`, `https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]);
+  const inference = () => {
+    // const result = spawn('python', ['${process.cwd()}/public/pythons/inferenceWeb.py', '${process.cwd()}/public/images/', '', xmlDir, pretrainedModel, id]);
+    const result = spawn('python', [`${process.cwd()}/public/pythons/singleInferenceWeb.py`, `https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]);
     
-  //   return new Promise((resolveFunc) => {
-  //     // result.stdout.on('data', (data) => {
-  //     //   console.log(data.toString());
-  //     // });
-  //     // result.stderr.on('data', (data) => {
-  //     //   console.log(data.toString());
-  //     // });
-  //     result.on('exit', (code) => {
-  //       resolveFunc(code)
-  //     });
-  //   });
-  // }
-  // await inference();
-
-  const options = {
-    mode: 'text',
-    pythonPath: 'python',
-    pythonOptions: ['-u'],
-    scriptPath: '',
-    args: [`https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]
+    return new Promise((resolveFunc) => {
+      // result.stdout.on('data', (data) => {
+      //   console.log(data.toString());
+      // });
+      // result.stderr.on('data', (data) => {
+      //   console.log(data.toString());
+      // });
+      result.on('exit', (code) => {
+        resolveFunc(code)
+      });
+    });
   }
-  await PythonShell.run(`${process.cwd()}/public/pythons/singleInferenceWeb.py`, options)
+  await inference();
+
+  // const options = {
+  //   mode: 'text',
+  //   pythonPath: 'python',
+  //   pythonOptions: ['-u'],
+  //   scriptPath: `${process.cwd()}/public/pythons/`,
+  //   args: [`https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]
+  // }
+  // await PythonShell.run('singleInferenceWeb.py', options);
 
   const data = fs.readFileSync(`${process.cwd()}/public/xmls/${id}.xml`, 'utf8');
   res.status(200).send(data);
