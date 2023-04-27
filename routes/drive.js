@@ -1,8 +1,12 @@
 var express = require('express');
 var router = express.Router();
 
-const multer = require('multer')
+const multer = require('multer');
 const upload = multer();
+
+const fs = require('fs');
+
+const { spawn } = require('child_process');
 
 /* GET drive listing. */
 router.get('/', function(req, res, next) {
@@ -154,6 +158,34 @@ router.post('/uploadImage', upload.any(), async (req, res) => {
   }
 
   res.status(200).send(uploadedFiles);
+})
+
+router.post('/inference', async (req, res) => {
+  const { id, pretrainedModel } = req.body;
+  const xmlDir = `${process.cwd()}/public/xmls`;
+
+  const inference = () => {
+    // const result = spawn('python', ['${process.cwd()}/public/pythons/inferenceWeb.py', '${process.cwd()}/public/images/', '', xmlDir, pretrainedModel, id]);
+    const result = spawn('python', [`${process.cwd()}/public/pythons/singleInferenceWeb.py`, `https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]);
+    
+    return new Promise((resolveFunc) => {
+      // result.stdout.on('data', (data) => {
+      //   console.log(data.toString());
+      // });
+      // result.stderr.on('data', (data) => {
+      //   console.log(data.toString());
+      // });
+      result.on('exit', (code) => {
+        resolveFunc(code)
+      });
+    });
+  }
+  await inference();
+
+  const data = fs.readFileSync(`${process.cwd()}/public/xmls/${id}.xml`, 'utf8');
+  res.status(200).send(data);
+
+  fs.unlinkSync(`${process.cwd()}/public/xmls/${id}.xml`, { recursive: true });
 })
 
 router.post('/updateCoco', async (req, res) => {
@@ -313,12 +345,12 @@ router.post('/getSave', async (req, res) => {
   });
 
   const { id } = list.data.files[0];
-  const file = await drive.files.get({
+  const { data } = await drive.files.get({
     fileId: id,
     alt: 'media'
   });
   
-  res.status(200).send(file.data);
+  res.status(200).send(data);
 })
 
 module.exports = router;
