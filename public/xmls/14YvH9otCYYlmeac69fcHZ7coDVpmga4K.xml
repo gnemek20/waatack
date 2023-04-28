@@ -1,0 +1,37 @@
+<annotation>
+    <folder>drive.google.com</folder>
+    <filename>uc?export=view&id=14YvH9otCYYlmeac69fcHZ7coDVpmga4K</filename>
+    <path>C:\Users\gnemek20\Desktop\waatsans\waatack\https:\drive.google.com\uc?export=view&id=14YvH9otCYYlmeac69fcHZ7coDVpmga4K</path>
+    <source>
+        <database>Unknown</database>
+    </source>
+    <size>
+        <width>301</width>
+        <height>400</height>
+        <depth>3</depth>
+    </size>
+    <segmented>0</segmented>
+    <object>
+        <name>potted plant</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>9.163249015808105</xmin>
+            <ymin>238.88734436035156</ymin>
+            <xmax>39.792781829833984</xmax>
+            <ymax>281.7485046386719</ymax>
+        </bndbox>
+    </object>    <object>
+        <name>person</name>
+        <pose>Unspecified</pose>
+        <truncated>0</truncated>
+        <difficult>0</difficult>
+        <bndbox>
+            <xmin>140.2288360595703</xmin>
+            <ymin>71.11843872070312</ymin>
+            <xmax>231.24337768554688</xmax>
+            <ymax>364.4382019042969</ymax>
+        </bndbox>
+    </object>
+</annotation>

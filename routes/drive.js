@@ -204,7 +204,7 @@ router.post('/inference', async (req, res) => {
   const data = fs.readFileSync(`${process.cwd()}/public/xmls/${id}.xml`, 'utf8');
   res.status(200).send(data);
 
-  // fs.unlinkSync(`${process.cwd()}/public/xmls/${id}.xml`, { recursive: true });
+  fs.unlinkSync(`${process.cwd()}/public/xmls/${id}.xml`, { recursive: true });
 })
 
 router.post('/updateCoco', async (req, res) => {
