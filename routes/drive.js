@@ -165,17 +165,26 @@ router.post('/inference', async (req, res) => {
   const { id, pretrainedModel } = req.body;
   const xmlDir = `${process.cwd()}/public/xmls`;
 
+  const makeXmlsFolder = () => {
+    const dir = `${process.cwd()}/public/xmls`;
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+  }
+  await makeXmlsFolder();
+
   const inference = () => {
     // const result = spawn('python', ['${process.cwd()}/public/pythons/inferenceWeb.py', '${process.cwd()}/public/images/', '', xmlDir, pretrainedModel, id]);
     const result = spawn('python', [`${process.cwd()}/public/pythons/singleInferenceWeb.py`, `https://drive.google.com/uc?export=view&id=${id}`, '', xmlDir, pretrainedModel, id]);
     
     return new Promise((resolveFunc) => {
-      // result.stdout.on('data', (data) => {
-      //   console.log(data.toString());
-      // });
-      // result.stderr.on('data', (data) => {
-      //   console.log(data.toString());
-      // });
+      result.stdout.on('data', (data) => {
+        console.log(data.toString());
+      });
+      result.stderr.on('data', (data) => {
+        console.log(data.toString());
+      });
       result.on('exit', (code) => {
         resolveFunc(code)
       });
@@ -195,7 +204,7 @@ router.post('/inference', async (req, res) => {
   const data = fs.readFileSync(`${process.cwd()}/public/xmls/${id}.xml`, 'utf8');
   res.status(200).send(data);
 
-  fs.unlinkSync(`${process.cwd()}/public/xmls/${id}.xml`, { recursive: true });
+  // fs.unlinkSync(`${process.cwd()}/public/xmls/${id}.xml`, { recursive: true });
 })
 
 router.post('/updateCoco', async (req, res) => {
