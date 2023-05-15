@@ -1,0 +1,1 @@
+torchvision PyYAML psutil pascal-voc-writer seaborn numpy tqdm pillow opencv-python ipython
